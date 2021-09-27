@@ -1,26 +1,44 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { useEffect, useState } from 'react';
 
-function App() {
+import client from './graphql/client';
+import { GET_TEXTS } from './graphql/queries';
+
+type connectTextsProps = {
+  id: string;
+  createdAt: string;
+  updatedAt: string;
+  title: string;
+  slug: string;
+  content: {
+    html: string;
+  };
+  validity: string;
+};
+
+const App = () => {
+  const [texts, setTexts] = useState([]);
+
+  useEffect(() => {
+    const getPages = async () => {
+      const { connectTexts } = await client.request(GET_TEXTS);
+
+      setTexts(connectTexts);
+    };
+
+    getPages();
+  }, []);
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <h1>App</h1>
+      {texts?.map(({ title, content }: connectTextsProps) => (
+        <>
+          <h2>{title}</h2>
+          <div dangerouslySetInnerHTML={{ __html: content.html }}></div>
+        </>
+      ))}
     </div>
   );
-}
+};
 
 export default App;
